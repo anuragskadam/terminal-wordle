@@ -22,6 +22,12 @@ colors = {
     "nothing": reset,
 }
 
+codes = {
+    "wrong": "0",
+    "misplaced": "1",
+    "right": "2",
+}
+
 word = None
 
 status = None
@@ -59,15 +65,18 @@ def move_leftest():
 # def move_right(n: int = 1):
 #     print(f"\033[{n}C", end="")
 
+guesses = []
 
 def update_guess(guess, guess_raw):
-    for n, c in enumerate(guess):
-        color = (
-            colors[status[c]]
-            if colors[status[c]] != colors["right"]
-            else (colors["right"] if c == word[n] else colors["misplaced"])
+    guesses.append((guess, ""))
+    for i, c in enumerate(guess):
+        stat = (
+            status[c]
+            if status[c] != "right"
+            else ("right" if c == word[i] else "misplaced")
         )
-        print(color + guess_raw[n] + reset, end="")
+        guess[-1][1] += codes[stat]
+        print(colors[stat] + guess_raw[i] + reset, end="")
 
 
 def check_alphabet(word: str):
@@ -115,7 +124,7 @@ def start():
             if guess == "guwahati":
                 change_title(word)
             elif guess == "pune":
-                change_title(good_guesser([]))
+                change_title(good_guesser(guesses))
 
             if not check_alphabet(guess):
                 move_up()
