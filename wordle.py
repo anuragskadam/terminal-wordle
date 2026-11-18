@@ -1,6 +1,9 @@
 import random
 import string
+import readline
+
 from good_guesser import good_guesser
+
 
 with open("words.txt", "r") as f:
     wordles = tuple(line.strip() for line in f)
@@ -23,13 +26,12 @@ colors = {
 }
 
 codes = {
-    "wrong": "0",
-    "misplaced": "1",
-    "right": "2",
+    colors["wrong"]: "0",
+    colors["misplaced"]: "1",
+    colors["right"]: "2",
 }
 
 word = None
-
 status = None
 
 LINE_NUMBER = None
@@ -68,16 +70,22 @@ def move_leftest():
 
 
 def update_guess(guess, guess_raw):
-    guesses.append([guess, ""])
+    cnt = {}
+    for c in word:
+        if c not in cnt:
+            cnt[c] = 0
+        cnt[c] += 1
+    paint = [colors["wrong"]] * 5
     for i, c in enumerate(guess):
-        if word[i] == c:
-            stat = "right"
-        elif c in word:
-            stat = "misplaced"
-        else:
-            stat = "wrong"
-        guesses[-1][1] += codes[stat]
-        print(colors[stat] + guess_raw[i] + reset, end="")
+        if c == word[i]:
+            paint[i] = colors["right"]
+            cnt[c] -= 1
+    for i, c in enumerate(guess):
+        if paint[i] != colors["right"] and c in cnt and cnt[c] > 0:
+            paint[i] = colors["misplaced"]
+            cnt[c] -= 1
+        print(paint[i] + guess_raw[i] + reset, end="")
+    guesses.append((guess, "".join(codes[col] for col in paint)));
 
 
 def check_alphabet(word: str):
