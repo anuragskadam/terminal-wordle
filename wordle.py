@@ -70,11 +70,12 @@ def move_leftest():
 def update_guess(guess, guess_raw):
     guesses.append([guess, ""])
     for i, c in enumerate(guess):
-        stat = (
-            status[c]
-            if status[c] != "right"
-            else ("right" if c == word[i] else "misplaced")
-        )
+        if word[i] == c:
+            stat = "right"
+        elif c in word:
+            stat = "misplaced"
+        else:
+            stat = "wrong"
         guesses[-1][1] += codes[stat]
         print(colors[stat] + guess_raw[i] + reset, end="")
 
