@@ -1,0 +1,164 @@
+import random
+import string
+from good_guesser import good_guesser
+
+with open("words.txt", "r") as f:
+    wordles = tuple(line.strip() for line in f)
+
+NUM_CHANCES = 6
+
+red = "\033[31m"
+green = "\033[32m"
+yellow = "\033[33m"
+blue = "\033[34m"
+dim = "\033[2m"
+reset = "\033[0m"
+
+
+colors = {
+    "wrong": dim,
+    "misplaced": yellow,
+    "right": green,
+    "nothing": reset,
+}
+
+word = None
+
+status = None
+
+LINE_NUMBER = None
+
+def reset_vars():
+    global word, status, LINE_NUMBER
+
+    word = random.choice(wordles)
+    status = {c: "nothing" for c in string.ascii_lowercase}
+    LINE_NUMBER = 5
+
+reset_vars()
+
+def print_status():
+    print("[ ", end="")
+    for c in string.ascii_lowercase:
+        print(colors[status[c]] + c + reset, end="")
+    print(reset + " ]", end="")
+
+
+def move_up(n: int = 1):
+    print(f"\033[{n}A", end="")
+
+
+def move_down(n: int = 1):
+    print(f"\033[{n}B", end="")
+
+
+def move_leftest():
+    print("\r", end="")
+
+
+# def move_right(n: int = 1):
+#     print(f"\033[{n}C", end="")
+
+
+def update_guess(guess, guess_raw):
+    for n, c in enumerate(guess):
+        color = (
+            colors[status[c]]
+            if colors[status[c]] != colors["right"]
+            else (colors["right"] if c == word[n] else colors["misplaced"])
+        )
+        print(color + guess_raw[n] + reset, end="")
+
+
+def check_alphabet(word: str):
+    for c in word:
+        if c not in string.ascii_lowercase:
+            return False
+    return True
+
+
+def print_error(guess_raw: str, msg: str):
+    print(dim + red + guess_raw + reset + dim + " - " + msg + reset)
+
+def print_start_guessing(guess_remaining):
+    print(f"Start Guessing.. ({guess_remaining} left)", end="")
+
+def change_title(word : str):
+    move_up(LINE_NUMBER)
+    move_leftest()
+    print(blue + f"{word.title()} " + reset, end="")
+    move_down(LINE_NUMBER)
+    move_leftest()
+
+def start():
+    global word, status, LINE_NUMBER
+
+    print("\033[H\033[J" + blue + f"Wordle\n" + reset)
+
+    print_status()
+    print("\n")
+
+    chance = 0
+
+    print_start_guessing(NUM_CHANCES-chance)
+    print()
+
+    correct_guessed = False
+
+    for chance in range(NUM_CHANCES):
+        while True:
+            # guess not in words list
+            guess_raw = input()
+            guess = guess_raw.lower()
+            LINE_NUMBER += 1
+
+            if guess == "guwahati":
+                change_title(word)
+            elif guess == "pune":
+                change_title(good_guesser([]))
+
+            if not check_alphabet(guess):
+                move_up()
+                print_error(guess_raw, "Word should only contain alphabets")
+            elif len(guess) != 5:
+                move_up()
+                print_error(guess_raw, "Word should be 5-lettered")
+            elif guess not in wordles:
+                move_up()
+                print_error(guess_raw, "Word not in dictionary")
+            else:
+                break
+
+        if guess.lower() == word:
+            print(colors["right"] + "\nCorrect Guess!!" + reset)
+            correct_guessed = True
+            break
+
+        for i, ch in enumerate(guess):
+            if ch == word[i]:
+                status[ch] = "right"
+            elif ch in word:
+                if status[ch] != "right":
+                    status[ch] = "misplaced"
+            else:
+                status[ch] = "wrong"
+        lines_to_move = LINE_NUMBER - 2
+        move_up(lines_to_move)
+        print_status()
+        move_leftest()
+        move_down(2)
+        print_start_guessing(NUM_CHANCES-chance-1)
+        move_down(lines_to_move - 3)
+        move_leftest()
+        update_guess(guess, guess_raw)
+        move_down()
+        move_leftest()
+
+    if not correct_guessed:
+        print("\nCorrect word was " + green + word.upper() + reset)
+
+    if input("\nPlay again (y/N)? ").lower() == "y":
+        reset_vars()
+        start()
+
+start()
