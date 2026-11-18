@@ -33,10 +33,11 @@ word = None
 status = None
 
 LINE_NUMBER = None
+guesses = []
 
 def reset_vars():
     global word, status, LINE_NUMBER
-
+    guesses = []
     word = random.choice(wordles)
     status = {c: "nothing" for c in string.ascii_lowercase}
     LINE_NUMBER = 5
@@ -65,17 +66,16 @@ def move_leftest():
 # def move_right(n: int = 1):
 #     print(f"\033[{n}C", end="")
 
-guesses = []
 
 def update_guess(guess, guess_raw):
-    guesses.append((guess, ""))
+    guesses.append([guess, ""])
     for i, c in enumerate(guess):
         stat = (
             status[c]
             if status[c] != "right"
             else ("right" if c == word[i] else "misplaced")
         )
-        guess[-1][1] += codes[stat]
+        guesses[-1][1] += codes[stat]
         print(colors[stat] + guess_raw[i] + reset, end="")
 
 
