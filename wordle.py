@@ -38,7 +38,7 @@ LINE_NUMBER = None
 guesses = []
 
 def reset_vars():
-    global word, status, LINE_NUMBER
+    global word, status, LINE_NUMBER, guesses
     guesses = []
     word = random.choice(wordles)
     status = {c: "nothing" for c in string.ascii_lowercase}
